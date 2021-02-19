@@ -9,9 +9,9 @@ spring:
     password: root
     filters: stat
     maxActive: 20
-    initialSize: 1
+    initialSize: 5
     maxWait: 60000
-    minIdle: 1
+    minIdle: 3
     timeBetweenEvictionRunsMillis: 60000
     minEvictableIdleTimeMillis: 300000
     validationQuery: select 1 FROM DUAL

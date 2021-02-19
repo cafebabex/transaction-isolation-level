@@ -1,6 +1,6 @@
-package com.qh.transactionisolationlevel.controller;
+package com.qh.transactionisolationlevel.api;
 
-import com.qh.transactionisolationlevel.service.UserService;
+import com.qh.transactionisolationlevel.service.UserDaoService;
 import com.qh.transactionisolationlevel.util.MyThreadPoolUtil;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ReadUnCommit {
 
     @Autowired
-    private UserService userService;
+    private UserDaoService userDaoService;
 
     @Autowired
     private UpdateNameCallable updateNameCallable;
@@ -30,7 +30,7 @@ public class ReadUnCommit {
     public void sleepAndCommit(Long id, String name) {
         try {
             //使用正常方法查询数据库的值
-            String nowStr = userService.getName(1L);
+            String nowStr = userDaoService.getName(1L);
             log.info("准备更新的值：{}", name);
             log.info("当前数据库的值：{}", nowStr);
 
@@ -45,17 +45,18 @@ public class ReadUnCommit {
             Thread.sleep(1000);
 
             //使用不可提交读读取数据库的值
-            String readUnCommitStr = userService.getUnCommitName(1L);
-            log.info("不可提交读隔离方式读取的值：{}", readUnCommitStr);
+            String readUnCommitStr = userDaoService.getUnCommitName(1L);
+            log.info("线程一 不可提交读隔离方式读取的值：{}", readUnCommitStr);
 
             //使用正常方法查询数据库的值
-            String normalStr = userService.getName(1L);
-            log.info("正常读取的值：{}", normalStr);
+            String normalStr = userDaoService.getName(1L);
+            log.info("线程一 正常读取的值：{}", normalStr);
 
             submit.get();
+            log.info("线程二 提交了事务");
             //事务提交后数据库的值
-            String commitStr = userService.getName(1L);
-            log.info("提交事务后，数据库的值：{}", commitStr);
+            String commitStr = userDaoService.getName(1L);
+            log.info("线程一 提交事务后，数据库的值：{}", commitStr);
         } catch (InterruptedException e) {
             e.printStackTrace();
             Thread.currentThread().interrupt();
@@ -69,7 +70,7 @@ public class ReadUnCommit {
 class UpdateNameCallable implements Callable<Integer> {
 
     @Autowired
-    private UserService userService;
+    private UserDaoService userDaoService;
 
     @Setter
     private Long id;
@@ -78,6 +79,6 @@ class UpdateNameCallable implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        return userService.updateName(id, name);
+        return userDaoService.updateName(id, name);
     }
 }

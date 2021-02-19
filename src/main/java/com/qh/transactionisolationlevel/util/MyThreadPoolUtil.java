@@ -16,7 +16,7 @@ public class MyThreadPoolUtil {
         if(pool == null){
             synchronized (MyThreadPoolUtil.class){
                 if(pool == null){
-                    pool = new ThreadPoolExecutor(1,2,60, TimeUnit.MILLISECONDS,
+                    pool = new ThreadPoolExecutor(4,10,60, TimeUnit.MILLISECONDS,
                             new LinkedBlockingDeque<>(10), Executors.defaultThreadFactory(), new MyRejectedExecutionHandler());
                 }
             }
