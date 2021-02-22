@@ -6,7 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -19,27 +25,68 @@ public class UserDaoService {
     @Autowired
     private UserMapper userMapper;
 
-    @Transactional(rollbackFor = Exception.class)
-    public Integer updateName(Long id, String name) {
-        //更新，休眠10s后提交
-        int i = userMapper.updateById(User.builder().id(id).name(name).build());
-        log.info("线程二 更新了数据为：{},但是还没有提交",name);
+    private final CountDownLatch waitUpdateLatch = new CountDownLatch(2);
+    private final CountDownLatch updateLatch = new CountDownLatch(1);
+    private final CountDownLatch commitLatch = new CountDownLatch(1);
+
+
+    /**
+     * 正常线程，在更新前，开启事务更新后，事务提交后，分别读取三次值
+     *
+     * @param id id
+     */
+    public void readUnCommittedThread1(Long id) {
         try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
+            User user;
+            updateLatch.await();
+            user = userMapper.selectById(id);
+            log.info("线程一 更新后读取数据name：{}", user.getName());
+            waitUpdateLatch.countDown();
+            commitLatch.await();
+            user = userMapper.selectById(id);
+            log.info("线程一 提交后读取数据name：{}", user.getName());
+        } catch (Exception e) {
+            log.error("线程一异常", e);
         }
-        return i;
+
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
-    public String getUnCommitName(long l) {
-        return userMapper.selectById(l).getName();
+    public void readUnCommittedThread2(Long id) {
+        try {
+            User user;
+            updateLatch.await();
+            user = userMapper.selectById(id);
+            log.info("线程二 更新后读取数据name：{}", user.getName());
+            waitUpdateLatch.countDown();
+            commitLatch.await();
+            user = userMapper.selectById(id);
+            log.info("线程二 提交后读取数据name：{}", user.getName());
+        } catch (Exception e) {
+            log.error("线程二异常", e);
+        }
     }
 
-    public String getName(long l) {
-        return userMapper.selectById(l).getName();
+    @Transactional(rollbackFor = Exception.class,isolation = Isolation.READ_UNCOMMITTED)
+    public void readUnCommittedThread3(Long id, String name) {
+        User user = userMapper.selectById(id);
+        log.info("线程三 更新前读取数据name：{}，开始准备将数据更新为：{}", user.getName(), name);
+        try {
+            user.setName(name);
+            int i = userMapper.updateById(user);
+            if (i < 1) {
+                throw new RuntimeException("更新数据异常");
+            }
+            log.info("线程三 将数据更新为：{}，但是还没有提交", user.getName());
+            updateLatch.countDown();
+
+            waitUpdateLatch.await();
+            log.info("线程三 提交事务->->->->->->->->");
+        } catch (Exception e) {
+            log.error("线程三异常", e);
+        }finally {
+            commitLatch.countDown();
+        }
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
@@ -64,7 +111,7 @@ public class UserDaoService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class,isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
     public void updateNameNo5sLater(Long id, String expectName) {
         try {
             Thread.sleep(1_000);
@@ -79,5 +126,6 @@ public class UserDaoService {
             Thread.currentThread().interrupt();
         }
     }
+
 }
 

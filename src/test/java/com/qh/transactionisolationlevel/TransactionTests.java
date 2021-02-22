@@ -25,7 +25,7 @@ class TransactionTests {
         Long id = 1L;
         //要更新的值
         String expectStr = String.valueOf(new Random().nextInt(100));
-        readUnCommit.sleepAndCommit(id, expectStr);
+        readUnCommit.testReadUnCommitted(id, expectStr);
     }
 
 

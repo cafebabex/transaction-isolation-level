@@ -2,15 +2,11 @@ package com.qh.transactionisolationlevel.api;
 
 import com.qh.transactionisolationlevel.service.UserDaoService;
 import com.qh.transactionisolationlevel.util.MyThreadPoolUtil;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 
 /**
  * @author quhao
@@ -24,61 +20,48 @@ public class ReadUnCommit {
     @Autowired
     private UserDaoService userDaoService;
 
-    @Autowired
-    private UpdateNameCallable updateNameCallable;
+    private final CountDownLatch latch = new CountDownLatch(3);
 
-    public void sleepAndCommit(Long id, String name) {
+    /**
+     * 测试思路：总共开三个线程，
+     * 线程一：正常线程，开启事务更新后，事务提交后，分别读取两次值
+     * 线程二：脏读线程，开启事务更新后，事务提交后，分别读取两次值
+     * 线程三：开启事务，默认隔离级别，更新当前值为需要的值
+     *
+     * @param id   要更新的数据库记录id
+     * @param name 要把user的名字改成什么
+     */
+    public void testReadUnCommitted(Long id, String name) {
+
+
+        //线程一：正常线程，开启事务更新后，事务提交后，分别读取两次值
+        MyThreadPoolUtil.getPool().execute(
+                () -> {
+                    userDaoService.readUnCommittedThread1(id);
+                    latch.countDown();
+                }
+        );
+
+        //线程二：脏读线程，开启事务更新后，事务提交后，分别读取两次值
+        MyThreadPoolUtil.getPool().execute(
+                () -> {
+                    userDaoService.readUnCommittedThread2(id);
+                    latch.countDown();
+                }
+        );
+
+        //线程三：开启事务，默认隔离级别，更新当前值为需要的值
+        MyThreadPoolUtil.getPool().execute(
+                () -> {
+                    userDaoService.readUnCommittedThread3(id, name);
+                    latch.countDown();
+                }
+        );
+
         try {
-            //使用正常方法查询数据库的值
-            String nowStr = userDaoService.getName(1L);
-            log.info("准备更新的值：{}", name);
-            log.info("当前数据库的值：{}", nowStr);
-
-            //开一个线程开启事务去更新，休眠10s后提交
-            ThreadPoolExecutor pool = MyThreadPoolUtil.getPool();
-            updateNameCallable.setName(name);
-            updateNameCallable.setId(id);
-            Future<Integer> submit = pool.submit(updateNameCallable);
-
-
-            //休眠一秒，等另一个线程事务操作
-            Thread.sleep(1000);
-
-            //使用不可提交读读取数据库的值
-            String readUnCommitStr = userDaoService.getUnCommitName(1L);
-            log.info("线程一 不可提交读隔离方式读取的值：{}", readUnCommitStr);
-
-            //使用正常方法查询数据库的值
-            String normalStr = userDaoService.getName(1L);
-            log.info("线程一 正常读取的值：{}", normalStr);
-
-            submit.get();
-            log.info("线程二 提交了事务");
-            //事务提交后数据库的值
-            String commitStr = userDaoService.getName(1L);
-            log.info("线程一 提交事务后，数据库的值：{}", commitStr);
+            latch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
-            Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
         }
-    }
-}
-
-@Service
-class UpdateNameCallable implements Callable<Integer> {
-
-    @Autowired
-    private UserDaoService userDaoService;
-
-    @Setter
-    private Long id;
-    @Setter
-    private String name;
-
-    @Override
-    public Integer call() throws Exception {
-        return userDaoService.updateName(id, name);
     }
 }
