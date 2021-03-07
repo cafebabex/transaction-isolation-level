@@ -18,7 +18,7 @@ public class MyThreadPoolUtil {
             synchronized (MyThreadPoolUtil.class) {
                 if (pool == null) {
                     pool = new ThreadPoolExecutor(4, 10, 60, TimeUnit.MILLISECONDS,
-                            new LinkedBlockingDeque<>(10), new MyThreadFactory(), new MyRejectedExecutionHandler());
+                            new LinkedBlockingDeque<>(1), new MyThreadFactory(), new MyRejectedExecutionHandler());
                 }
             }
         }
@@ -41,8 +41,8 @@ class MyThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(Runnable r) {
         Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        thread.setName("my_thread" + integer.getAndDecrement());
+        thread.setDaemon(false);
+        thread.setName("my_thread---->" + integer.getAndIncrement());
         return thread;
     }
 }
