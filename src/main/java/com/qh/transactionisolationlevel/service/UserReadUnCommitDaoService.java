@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.concurrent.CountDownLatch;
@@ -58,7 +57,10 @@ public class UserReadUnCommitDaoService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    /**
+     * 采取数据库默认的事务隔离级别
+     * @param id 查询数据的id
+     */
     public void readUnCommittedThread2(Long id) {
         try {
             User user;
@@ -80,6 +82,7 @@ public class UserReadUnCommitDaoService {
             waitStartLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
         //1.获取事务定义
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();

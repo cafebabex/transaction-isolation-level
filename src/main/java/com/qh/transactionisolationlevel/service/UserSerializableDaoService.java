@@ -1,14 +1,16 @@
 package com.qh.transactionisolationlevel.service;
 
+import com.qh.transactionisolationlevel.dao.mapper.UserMapper;
+import com.qh.transactionisolationlevel.dao.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -21,6 +23,8 @@ public class UserSerializableDaoService {
 
     @Autowired
     private DataSource dataSource;
+    @Autowired
+    private UserMapper userMapper;
 
     private final CountDownLatch waitUpdateLatch = new CountDownLatch(2);
     private final CountDownLatch waitStartLatch = new CountDownLatch(2);
@@ -128,12 +132,8 @@ public class UserSerializableDaoService {
     }
 
     private int getUserCount(Statement statement) throws SQLException {
-        int i = 0;
-        ResultSet resultSet = statement.executeQuery(SELECT_COUNT);
-        while (resultSet.next()) {
-            i++;
-        }
-        return i;
+        List<User> users = userMapper.selectList(null);
+        return users.size();
     }
 
     private void closeSource(Connection connection, Statement statement) {

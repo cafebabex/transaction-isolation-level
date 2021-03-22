@@ -40,19 +40,19 @@ public class UserReadCommitDaoService {
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             statement = connection.createStatement();
             waitStartLatch.countDown();
-            log.info("线程一 开启事务");
+            log.info("RR线程 开启事务");
 
             updateLatch.await();
             name = getUserName(statement);
-            log.info("线程一 更新后读取数据name：{}", name);
+            log.info("RR线程 更新后读取数据name：{}", name);
             waitUpdateLatch.countDown();
 
             commitLatch.await();
             name = getUserName(statement);
-            log.info("线程一 提交后读取数据name：{}", name);
+            log.info("RR线程 提交后读取数据name：{}", name);
             connection.commit();
         } catch (Exception e) {
-            log.error("线程一异常", e);
+            log.error("RR线程 异常", e);
             if (connection != null) {
                 try {
                     connection.rollback();
@@ -76,18 +76,18 @@ public class UserReadCommitDaoService {
             connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             statement = connection.createStatement();
             waitStartLatch.countDown();
-            log.info("线程二 开启事务");
+            log.info("RC线程 开启事务");
 
             updateLatch.await();
             name = getUserName(statement);
-            log.info("线程二 更新后读取数据name：{}", name);
+            log.info("RC线程 更新后读取数据name：{}", name);
             waitUpdateLatch.countDown();
 
             commitLatch.await();
             name = getUserName(statement);
-            log.info("线程二 提交后读取数据name：{}", name);
+            log.info("RC线程 提交后读取数据name：{}", name);
         } catch (Exception e) {
-            log.error("线程二异常", e);
+            log.error("RC线程 异常", e);
         } finally {
             closeSource(connection, statement);
         }
@@ -102,20 +102,20 @@ public class UserReadCommitDaoService {
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
             statement = connection.createStatement();
-            log.info("线程三 ：开启事务");
+            log.info("更新线程 ：开启事务");
 
             oldName = getUserName(statement);
-            log.info("线程三 更新前读取数据name：{}，开始准备将数据更新为：{}", oldName, name);
+            log.info("更新线程 更新前读取数据name：{}，开始准备将数据更新为：{}", oldName, name);
             statement.execute("update user set name = " + name + " where  id = 1;");
-            log.info("线程三 将数据更新为：{}，但是还没有提交", name);
+            log.info("更新线程 将数据更新为：{}，但是还没有提交", name);
             updateLatch.countDown();
 
             waitUpdateLatch.await();
-            log.info("线程三 提交事务->->->->->->->->");
+            log.info("更新线程 提交事务->->->->->->->->");
             connection.commit();
             commitLatch.countDown();
         } catch (Exception e) {
-            log.error("线程三异常", e);
+            log.error("更新线程 异常", e);
             try {
                 if (connection != null) {
                     connection.rollback();

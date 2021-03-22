@@ -28,8 +28,6 @@ public class RepeatableRead {
      * 线程二：脏读线程，开启事务更新后，事务提交后，分别读取两次值
      * 线程三：开启事务，默认隔离级别，更新当前值为需要的值
      *
-     * @param id   要更新的数据库记录id
-     * @param name 要把user的名字改成什么
      */
     public void test() {
 

@@ -36,7 +36,7 @@ public class ReadCommit {
         MyThreadPoolUtil.getPool().execute(
                 () -> {
                     userReadCommitDaoService.readCommittedThread1();
-                    log.info("线程一结束");
+                    log.info("RR线程 结束");
                     latch.countDown();
                 }
         );
@@ -45,7 +45,7 @@ public class ReadCommit {
         MyThreadPoolUtil.getPool().execute(
                 () -> {
                     userReadCommitDaoService.readCommittedThread2();
-                    log.info("线程二结束");
+                    log.info("RC线程 结束");
                     latch.countDown();
                 }
         );
@@ -55,7 +55,7 @@ public class ReadCommit {
         MyThreadPoolUtil.getPool().execute(
                 () -> {
                     userReadCommitDaoService.readCommittedThread3(name);
-                    log.info("线程三结束");
+                    log.info("更新线程 结束");
                     latch.countDown();
                 }
         );
