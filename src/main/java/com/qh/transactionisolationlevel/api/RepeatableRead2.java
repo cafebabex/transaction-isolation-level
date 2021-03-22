@@ -10,8 +10,6 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * @author quhao
- * 读未提交，最不安全的隔离级别
- * 产生脏读现象，读到其他线程还没有提交的事务信息
  */
 @Service
 @Slf4j

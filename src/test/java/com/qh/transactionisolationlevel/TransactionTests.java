@@ -15,6 +15,8 @@ class TransactionTests {
     @Resource
     ReadCommit readCommit;
     @Resource
+    ReadCommit2 readCommit2;
+    @Resource
     RepeatableRead repeatableRead;
     @Resource
     RepeatableRead2 repeatableRead2;
@@ -39,16 +41,19 @@ class TransactionTests {
 
     /**
      * 测试可提交读产生的不可重复读问题
-     * RC线程和RR线程在数据更新但是没有提交之前都避免了脏读现象
-     * RC线程在数据提交后后，读出了最新的值，可见RC是当前读，可以读出其他线程提交的记录
-     * RR线程在数据提交后仍然读出了老的值，解决了不可重复读问题，可见RR是快照读，第一次读取会生成一个快照，具体可以参考mysql的mvcc机制
-     * FIXME 但是RR线程虽然读取的值是快照的值，但是如果RR线程要更新这个值，也会读取到最新的值（可以参考测试类***）
      */
     @Test
-    void readCommit(){
+    void readCommit() {
         //要更新的值
         String expectStr = String.valueOf(new Random().nextInt(100));
         readCommit.test(expectStr);
+    }
+
+    @Test
+    void readCommit2() {
+        //要更新的值
+        String expectStr = String.valueOf(new Random().nextInt(100));
+        readCommit2.test(expectStr);
     }
 
     /**
@@ -77,12 +82,10 @@ class TransactionTests {
     void RepeatableRead2(){
         repeatableRead2.test();
     }
+
     /**
-     * 测试可提交读产生的不可重复读问题
-     * 线程一读取出当前的值
-     * 线程二更新数据库的值
-     * 线程一读取出更新的值
-     * 导致线程一同一个事务中，两次读取出来的值不一样
+     * 两个线程，一个线程写，一个线程读
+     * 运行后发现写线程一直无法写入数据，因为之前的读线程已经开启了事务并且隔离级别为serializable
      */
     @Test
     void serializable(){

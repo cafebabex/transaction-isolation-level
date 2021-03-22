@@ -28,7 +28,6 @@ public class UserReadUnCommitDaoService {
     private UserMapper userMapper;
 
     private final CountDownLatch waitUpdateLatch = new CountDownLatch(2);
-    private final CountDownLatch waitStartLatch = new CountDownLatch(2);
     private final CountDownLatch updateLatch = new CountDownLatch(1);
     private final CountDownLatch commitLatch = new CountDownLatch(1);
 
@@ -39,7 +38,6 @@ public class UserReadUnCommitDaoService {
         def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         //3.获得事务状态
         TransactionStatus status = transactionManager.getTransaction(def);
-        waitStartLatch.countDown();
         try {
             User user;
             updateLatch.await();
@@ -64,7 +62,6 @@ public class UserReadUnCommitDaoService {
     public void readUnCommittedThread2(Long id) {
         try {
             User user;
-            waitStartLatch.countDown();
             updateLatch.await();
             user = userMapper.selectById(id);
             log.info("普通线程 更新后读取数据name：{}", user.getName());
@@ -78,12 +75,6 @@ public class UserReadUnCommitDaoService {
     }
 
     public void readUnCommittedThread3(Long id, String name) {
-        try {
-            waitStartLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
-        }
         //1.获取事务定义
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         //2.设置事务隔离级别，开启新事务
