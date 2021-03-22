@@ -3,9 +3,9 @@ package com.qh.transactionisolationlevel.api;
 import com.qh.transactionisolationlevel.service.UserSerializableDaoService;
 import com.qh.transactionisolationlevel.util.MyThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class Serializable {
 
-    @Autowired
+    @Resource
     private UserSerializableDaoService userSerializableDaoService;
 
     private final CountDownLatch latch = new CountDownLatch(3);

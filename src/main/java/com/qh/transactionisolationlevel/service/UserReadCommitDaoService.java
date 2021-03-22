@@ -1,9 +1,9 @@
 package com.qh.transactionisolationlevel.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -19,7 +19,7 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class UserReadCommitDaoService {
 
-    @Autowired
+    @Resource
     private DataSource dataSource;
 
     private final CountDownLatch waitUpdateLatch = new CountDownLatch(2);
@@ -28,7 +28,6 @@ public class UserReadCommitDaoService {
     private final CountDownLatch commitLatch = new CountDownLatch(1);
 
     private static final String SELECT_NAME = "select name from user where id = 1;";
-    private static final String SELECT_COUNT = "select name from user;";
 
     public void readCommittedThread1() {
         Connection connection = null;

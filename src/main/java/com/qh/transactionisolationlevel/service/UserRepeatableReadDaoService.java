@@ -1,9 +1,9 @@
 package com.qh.transactionisolationlevel.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -19,7 +19,7 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class UserRepeatableReadDaoService {
 
-    @Autowired
+    @Resource
     private DataSource dataSource;
 
     private final CountDownLatch waitUpdateLatch = new CountDownLatch(2);

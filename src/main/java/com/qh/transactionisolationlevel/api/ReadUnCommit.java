@@ -3,10 +3,10 @@ package com.qh.transactionisolationlevel.api;
 import com.qh.transactionisolationlevel.service.UserReadUnCommitDaoService;
 import com.qh.transactionisolationlevel.util.MyThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.*;
+import javax.annotation.Resource;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author quhao
@@ -17,7 +17,7 @@ import java.util.concurrent.*;
 @Slf4j
 public class ReadUnCommit {
 
-    @Autowired
+    @Resource
     private UserReadUnCommitDaoService userReadUnCommitDaoService;
 
     private final CountDownLatch latch = new CountDownLatch(3);

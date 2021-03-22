@@ -4,13 +4,13 @@ import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
 import com.qh.transactionisolationlevel.dao.mapper.UserMapper;
 import com.qh.transactionisolationlevel.dao.model.User;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import javax.annotation.Resource;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -21,10 +21,10 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class UserReadUnCommitDaoService {
 
-    @Autowired
+    @Resource
     private PlatformTransactionManager transactionManager;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     private final CountDownLatch waitUpdateLatch = new CountDownLatch(2);
