@@ -1,5 +1,5 @@
+事务隔离级别演示
 <h1 align="center"><a href="https://github.com/xkcoding" target="_blank">事务隔离级别代码演示</a></h1>
-
 
 ## 项目简介
 
@@ -24,13 +24,11 @@
 3. 在 IDEA 中 Maven Projects 的面板导入项目根目录下 的 `pom.xml` 文件
 4. Maven Projects 找不到的童鞋，可以勾上 IDEA 顶部工具栏的 View -> Tool Buttons ，然后 Maven Projects 的面板就会出现在 IDEA 的右侧
 5. 找到 test 下的 **TransactionTests** 测试类 类就可以运行了，每个测试demo可以通过查看控制台日志输出看到各种隔离级别发生的具体现象
-7. **`注意：运行各个 demo 之前，需要事先初始化数据库数据的，亲们别忘记了哦~`**
+6. **`注意：运行各个 demo 之前，需要事先初始化数据库数据的，亲们别忘记了哦~`**
 
+### 具体解释
 
-##具体解释
-
-
-###脏读
+### 脏读
 > 一个线程读取到了另外线程没有提交的事务
 
 ####脏读思路
