@@ -8,7 +8,7 @@ import javax.annotation.Resource;
 import java.util.Random;
 
 @SpringBootTest
-class TransactionTests {
+class TransactionTest {
 
     @Resource
     ReadUnCommit readUnCommit;

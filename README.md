@@ -53,7 +53,7 @@
 ### 不可重复读
 
 > 一个线程读到了其他事务提交的数据
-> 测试方法：com.qh.transactionisolationlevel.TransactionTests.readCommit
+> 测试方法：com.qh.transactionisolationlevel.TransactionTest.readCommit
 
 #### 现象解读
 
@@ -98,7 +98,7 @@
 
 ### 幻读
 
-> 在RR级别下，解决了一部分的幻读问题，这个一部分到底是指的什么，通过接下来的测试类演示给读者 com.qh.transactionisolationlevel.TransactionTests.RepeatableRead
+> 在RR级别下，解决了一部分的幻读问题，这个一部分到底是指的什么，通过接下来的测试类演示给读者 com.qh.transactionisolationlevel.TransactionTest.RepeatableRead
 
 #### 现象解读
 
@@ -117,7 +117,7 @@
 - 线程二结束
 
 > 从输出日志看出RR级别避免了幻读现象
-> 然后执行测试2（com.qh.transactionisolationlevel.TransactionTests.RepeatableRead2）
+> 然后执行测试2（com.qh.transactionisolationlevel.TransactionTest.RepeatableRead2）
 
 #### 现象解读
 
