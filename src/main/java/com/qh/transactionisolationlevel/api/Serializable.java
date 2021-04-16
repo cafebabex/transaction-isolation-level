@@ -20,7 +20,6 @@ public class Serializable {
 
     private final CountDownLatch latch = new CountDownLatch(2);
 
-
     public void test() {
         MyThreadPoolUtil.getPool().execute(
                 () -> {
