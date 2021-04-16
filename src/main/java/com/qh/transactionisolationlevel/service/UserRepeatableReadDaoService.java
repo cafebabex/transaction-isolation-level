@@ -64,7 +64,6 @@ public class UserRepeatableReadDaoService {
         }
     }
 
-
     public void readCommittedThread2() {
         Connection connection = null;
         int count = 0;
